@@ -17,7 +17,6 @@ logs
 *.tgz
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 /.nyc_output
 coverage/
 .parcel-cache/
