@@ -64,6 +64,12 @@ const cases = [
         name: 'First Tech - Capital One payment (ignore)',
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n***5267 had a transaction of ($26.00). Description: ACH Debit CAPITAL ONE  - MOBILE PMT . Date: Nov 17, 2025 ',
         expect: {count: 0}
+    },
+    {
+        name: 'First Tech - Mixed credit card payment and legit transaction',
+        sms: 'Transaction Alert from First Tech Federal Credit Union.\n' +
+            '***5267 had a transaction of ($116.45). Description: ACH Debit  OF HILLSBORO UTILITIES - UTILITIES . Date: Nov 12, 2025 ***5267 had a transaction of ($96.43). Description: ACH Debit CHASE CREDIT CRD  - EPAY . Date: Nov 12, 2025',
+        expect: {count: 1, payee: 'ACH Debit  OF HILLSBORO UTILITIES - UTILITIES', amount: '116.45', paymentMethod: 'Debit Card'}
     }
 ];
 
