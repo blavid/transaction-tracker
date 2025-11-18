@@ -110,26 +110,40 @@ const componentSpec = {
             // Flag to track if any pattern matched
             let matched = false;
 
-            // First Tech Federal Credit Union – multi-transaction blocks
+// First Tech Federal Credit Union – multi-transaction blocks (WITH REAL DATES)
             if (smsText.includes('Transaction Alert from First Tech Federal Credit Union')) {
                 const blocks = smsText.split('***').slice(1);
                 for (const block of blocks) {
-                    const match = block.match(/had a transaction of \(\$(\d+(?:\.\d+)?)\)\. Description: (.*?)\s+Date:/s);
+                    // Capture: amount, payee, month name, day, year
+                    const match = block.match(/had a transaction of \(\$(\d+(?:\.\d+)?)\)\. Description: (.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/s);
                     if (match) {
                         const amount = match[1];
                         let payee = match[2]
-                            .replace(/\s*\.\s*Date:/s, '')   // safety
-                            .replace(/\s*\.$/, '')           // remove trailing " ."
+                            .replace(/\s*\.$/, '')      // remove trailing " ."
                             .trim();
+
+                        const monthName = match[3];
+                        const day = match[4].padStart(2, '0');
+                        const year = match[5];
+
+                        // Build proper MM/DD/YYYY date from SMS
+                        const monthMap = {
+                            Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+                            Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
+                        };
+                        const dateStr = `${monthMap[monthName] || '01'}/${day}/${year}`;
 
                         const normalizedPayee = payee.toUpperCase().replace(/\s+/g, ' ').trim();
 
+                        // Skip credit card payments
                         if (excludedPayees.some(ex => normalizedPayee.includes(ex))) {
                             continue;
                         }
 
                         const paymentMethod = normalizedPayee.includes('VENMO') ? 'Venmo' : 'Debit Card';
+
                         transactions.push({
+                            date: dateStr,
                             amount,
                             payee,
                             paymentMethod
