@@ -15,6 +15,10 @@ const componentSpec = {
             if (!smsText) {
                 throw new Error('No SMS text found in email body (neither text nor HTML)');
             }
+            if (smsText.includes('Debit Card Purchase Alert from First Tech Federal Credit Union')) {
+                $.export('transactions', []);
+                return [];
+            }
             // Log the extracted SMS for debugging
             // console.log('Extracted SMS:', smsText);
             // Array to store all transactions

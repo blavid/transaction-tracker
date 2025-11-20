@@ -70,6 +70,11 @@ const cases = [
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n' +
             '***5267 had a transaction of ($116.45). Description: ACH Debit  OF HILLSBORO UTILITIES - UTILITIES . Date: Nov 12, 2025 ***5267 had a transaction of ($96.43). Description: ACH Debit CHASE CREDIT CRD  - EPAY . Date: Nov 12, 2025',
         expect: {count: 1, payee: 'ACH Debit  OF HILLSBORO UTILITIES - UTILITIES', amount: '116.45', paymentMethod: 'Debit Card'}
+    },
+    {
+        name: 'First Tech - Debit Card Purchase Alert (duplicate - ignore)',
+        sms: 'Debit Card Purchase Alert from First Tech Federal Credit Union. ACCT: Checking TRAN AMT: $218.13 TRAN DESC: POS Transaction 091155960 WINCO FOODS #40 Hillsboro ORUS AVAIL BAL: $5,186.70',
+        expect: {count: 0}
     }
 ];
 
