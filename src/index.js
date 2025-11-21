@@ -33,6 +33,12 @@ const componentSpec = {
                 'ACH Debit CAPITAL ONE - MOBILE PMT'
             ].map(p => p.trim().toUpperCase());
 
+            const toTitleCase = str => str
+                ? str.toLowerCase()
+                    .replace(/\b\w/g, c => c.toUpperCase())
+                    .replace(/#(\d+)/g, '#$1')
+                : str;
+
             // Regex patterns for each sender
             const patterns = [
                 {
@@ -41,7 +47,7 @@ const componentSpec = {
                     paymentMethod: 'Chase Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[2]
+                        payee: toTitleCase(match[2])
                     })
                 },
                 {
@@ -50,7 +56,7 @@ const componentSpec = {
                     paymentMethod: 'Chase Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[2]
+                        payee: toTitleCase(match[2])
                     })
                 },
                 {
@@ -59,7 +65,7 @@ const componentSpec = {
                     paymentMethod: 'Chase Card',
                     extract: (match) => ({
                         amount: `-${match[1]}`,  // Make amount negative for credits
-                        payee: match[2]
+                        payee: toTitleCase(match[2])
                     })
                 },
                 {
@@ -68,7 +74,7 @@ const componentSpec = {
                     paymentMethod: 'Savor Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[5]
+                        payee: toTitleCase(match[5])
                     })
                 },
                 {
@@ -89,7 +95,7 @@ const componentSpec = {
                     paymentMethod: 'Citibank Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[3].trim().replace(/\s+/g, ' ')
+                        payee: toTitleCase(match[3].trim().replace(/\s+/g, ' '))
                     })
                 },
                 {
@@ -98,7 +104,7 @@ const componentSpec = {
                     paymentMethod: 'Citibank Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[2].trim().replace(/\s+/g, ' ')
+                        payee: toTitleCase(match[2].trim().replace(/\s+/g, ' '))
                     })
                 },
                 {
@@ -107,7 +113,7 @@ const componentSpec = {
                     paymentMethod: 'Debit Card',
                     extract: (match) => ({
                         amount: match[1],
-                        payee: match[2].trim()
+                        payee: toTitleCase(match[2].trim())
                     })
                 }
             ];
@@ -123,7 +129,8 @@ const componentSpec = {
                     if (match) {
                         const amount = match[1];
                         let payee = match[2]
-                            .replace(/\s*\.$/, '')      // remove trailing " ."
+                            .replace(/\s*\.$/, '')           // remove trailing " ."
+                            .replace(/^ACH\s+Debit\s+/i, '') // remove "ACH Debit " prefix
                             .trim();
 
                         const monthName = match[3];
@@ -148,9 +155,9 @@ const componentSpec = {
 
                         transactions.push({
                             date: dateStr,
-                            amount,
-                            payee,
-                            paymentMethod
+                            amount: amount,
+                            payee: toTitleCase(payee),
+                            paymentMethod: paymentMethod
                         });
                     }
                 }
@@ -194,7 +201,7 @@ const componentSpec = {
                                 day: '2-digit',
                                 year: 'numeric'
                             }), // Current date as MM/DD/YYYY
-                            payee: payee,
+                            payee: toTitleCase(payee),
                             amount: amount,
                             paymentMethod: 'Unknown'
                         });
