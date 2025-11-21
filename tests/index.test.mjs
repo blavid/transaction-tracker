@@ -26,7 +26,7 @@ const cases = [
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n***5267 had a transaction of ($131.15). Description: ACH Debit PORTLAND GENERAL BILLPAY - BILLPAY . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ',
         expect: {
             count: 3,
-            payees: ['Ach Debit Portland General Billpay - Billpay', 'Ach Debit Vestwell  - Ach Tran', 'Ach Debit Vestwell  - Ach Tran']
+            payees: ['Portland General Billpay - Billpay', 'Vestwell  - Ach Tran', 'Vestwell  - Ach Tran']
         }
     },
     {
@@ -69,7 +69,7 @@ const cases = [
         name: 'First Tech - Mixed credit card payment and legit transaction',
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n' +
             '***5267 had a transaction of ($116.45). Description: ACH Debit  OF HILLSBORO UTILITIES - UTILITIES . Date: Nov 12, 2025 ***5267 had a transaction of ($96.43). Description: ACH Debit CHASE CREDIT CRD  - EPAY . Date: Nov 12, 2025',
-        expect: {count: 1, payee: 'Ach Debit  Of Hillsboro Utilities - Utilities', amount: '116.45', paymentMethod: 'Debit Card'}
+        expect: {count: 1, payee: 'Of Hillsboro Utilities - Utilities', amount: '116.45', paymentMethod: 'Debit Card'}
     },
     {
         name: 'First Tech - Debit Card Purchase Alert (duplicate - ignore)',

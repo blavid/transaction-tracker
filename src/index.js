@@ -129,7 +129,8 @@ const componentSpec = {
                     if (match) {
                         const amount = match[1];
                         let payee = match[2]
-                            .replace(/\s*\.$/, '')      // remove trailing " ."
+                            .replace(/\s*\.$/, '')           // remove trailing " ."
+                            .replace(/^ACH\s+Debit\s+/i, '') // remove "ACH Debit " prefix
                             .trim();
 
                         const monthName = match[3];
