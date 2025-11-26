@@ -99,8 +99,8 @@ const componentSpec = {
                     })
                 },
                 {
-                    // Citi Alerts (In-Person) - FINAL robust version
-                    regex: /Citi Alert: A \$(\d+\.\d{2}) transaction was made at\s+([A-Z0-9][A-Z0-9.* -]*?(?:\.[A-Z0-9.*-]+)*?) on card ending in \d{4}/i,
+                    // Citi Alerts – In-Person (robust for real-world spacing)
+                    regex: /Citi Alert: A \$(\d+\.\d{2}) transaction was made at\s+([^.]+?)\s+on card ending in \d{4}/i,
                     paymentMethod: 'Citibank Card',
                     extract: (match) => ({
                         amount: match[1],
