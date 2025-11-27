@@ -26,7 +26,7 @@ const cases = [
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n***5267 had a transaction of ($131.15). Description: ACH Debit PORTLAND GENERAL BILLPAY - BILLPAY . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ',
         expect: {
             count: 3,
-            payees: ['Pge', 'Vestwell  - Ach Tran', 'Vestwell  - Ach Tran']
+            payees: ['Pge', 'Sumday', 'Sumday']
         }
     },
     {
