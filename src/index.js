@@ -17,6 +17,10 @@ const componentSpec = {
 
         let transactions = [];
 
+        const log = (msg, data) => {
+            console.log(`${msg}`, data ? JSON.stringify(data, null, 2) : '');
+        };
+
         // === PAYEE MAPPING (friendly + metadata) ===
 // === FINAL ROBUST PAYEE MAPPING WITH REGEX ===
         const PAYEE_MAP = [
@@ -32,18 +36,20 @@ const componentSpec = {
             { regex: /HILLSBORO\s+UTILITIES/i,            name: 'City Of Hillsboro',   category: 'Utilities - H',       business: false, desc: 'Water and sewer service' },
             { regex: /CASCADE\s+NATURAL/i,                name: 'Cascade Natural Gas', category: 'Utilities- SR',       business: true, desc: 'Natural Gas Service' },
             { regex: /HOST\s+TOOLS/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
+            { regex: /SUNRIVER\s+ENVIRON/i,               name: 'Sunriver Environmental', category: 'Utilities - SR',   business: true, desc: 'Water and sewer service' },
             { regex: /STARLINK\s+HAS/i,                   name: 'Starlink',            category: 'Utilities- H',        business: false, desc: 'Internet Service' },
-            { regex: /SQ\s*\*\s*THREE\s+RI/i,                     name: 'Three Rivers Pool and Spa', category: 'Misc Svcs - SR', business: true, desc: 'Spa Service' },
+            { regex: /SANTANDER/i,                        name: 'Santander Bank',      category: 'Auto Payments',       business: false, desc: 'Car payment for Carmen' },
+            { regex: /BANK\s+OF\s+AMERICA/i,              name: 'Bank of America',     category: 'Auto Payments',       business: false, desc: 'RV payment for Thad' },
+            { regex: /ORACLE/i,                           name: 'Oracle COBRA',        category: 'Healthcare',          business: false, desc: 'COBRA payment' },
+            { regex: /VESTWELL/i,                         name: 'Sumday',              category: 'Charity',             business: false, desc: 'Contribution to 529 plan' },
+            { regex: /SUNRIVER\s+OWNERS/i,                name: 'Sunriver HOA',        category: 'HOA Dues - SR',       business: true, desc: 'Homeowner Association dues' },
+            { regex: /SQ\s*\*\s*THREE\s+RI/i,             name: 'Three Rivers Pool and Spa', category: 'Misc Svcs - SR', business: true, desc: 'Spa Service' },
             { regex: /WORLDMARK/i,                        name: 'Worldmark The Club',  category: 'Travel',              business: false, desc: 'Maintenance Dues' },
             { regex: /TESLA\s+SUPERC/i,                   name: 'Tesla Supercharger',  category: 'Auto Maint',          business: true, desc: 'Fuel for Carmen' },
             { regex: /HILLSBORO\s+GA/i,                   name: 'Hillsboro Garbage',   category: 'Utilities- H',        business: false, desc: 'Garbage service' },
-            { regex: /FIRST\s+LAST/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
-            { regex: /FIRST\s+LAST/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
-            { regex: /FIRST\s+LAST/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
-            { regex: /FIRST\s+LAST/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
             { regex: /NW\s+NATURAL/i,                     name: 'NW Natural',          category: 'Utilities- H',        business: false, desc: 'Natural Gas Service' },
             { regex: /MIDSTATE\s+ELE/i,                   name: 'Midstate Electric',   category: 'Utilities - SR',      business: true, desc: 'Electrical Service' },
-            { regex: /NETFLIX\s+/i,                       name: 'Netflix',             category: 'Utilities - SR',      business: true, desc: 'Monthly Subscription' },
+            { regex: /NETFLIX/i,                          name: 'Netflix',             category: 'Utilities - SR',      business: true, desc: 'Monthly Subscription' },
             { regex: /VENMO/i,                            name: 'Zully Ponce',         category: 'Cleaning Svcs - SR',  business: true, desc: 'Cleaning for guest' },
             { regex: /.*/,                                name: null,                  category: 'Other',               business: false, desc: 'Manual Review Required' }
         ];
@@ -101,16 +107,40 @@ const componentSpec = {
         if (smsText.includes('Transaction Alert from First Tech Federal Credit Union')) {
             const blocks = smsText.split('***').slice(1);
             for (const b of blocks) {
-                const m = b.match(/had a transaction of \(\$(\d+(?:\.\d+)?)\)\. Description: (.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/s);
-                if (!m) continue;
-                let payee = m[2].replace(/\s*\.$/, '').replace(/^ACH\s+Debit\s+/i, '').trim();
+                const m = b.match(/had a transaction of \(\$([0-9,]+\.\d{2})\)\.\s*Description:\s*(.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/is);
+                if (!m) {
+                    log('No match for block:', b);
+                    continue;
+                }
+
+                log('Raw description:', m[2]);
+                let payee = m[2]
+                    .replace(/\s*\.$/, '')                    // trailing " ."
+                    .replace(/^ACH\s+Debit\s+/i, '')          // "ACH Debit "
+                    .replace(/\s*-.*BILL.?PAYMT.*$/i, '')     // "- BILL PAYMT" garbage
+                    .replace(/\s*-.*PAYMT.*$/i, '')           // any "- PAYMT"
+                    .replace(/\s+FIRST TECH FCU.*$/i, '')     // remove your own credit union name
+                    .trim();
+
+                log('Cleaned payee:', `"${payee}"`);
+
+                // let payee = m[2].replace(/\s*\.$/, '').replace(/^ACH\s+Debit\s+/i, '').trim();
                 const norm = payee.toUpperCase().replace(/\s+/g,' ').trim();
-                if (excludedPayees.some(e => norm.includes(e))) continue;
+                log('Norm for exclude check:', `"${norm}"`);
+
+                if (excludedPayees.some(e => norm.includes(e))) {
+                    log('SKIPPED by excludedPayees:', norm);
+                    continue;
+                }
 
                 const monthMap = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
                 const date = `${monthMap[m[3]]||'01'}/${m[4].padStart(2,'0')}/${m[5]}`;
                 const method = norm.includes('VENMO') ? 'Venmo' : 'Debit Card';
                 const e = enrichPayee(payee);
+
+                log('Enriched result:', e);
+
+                log('Pushing transaction:', {date, payee: e.final, amount: m[1], business: !!e.biz});
 
                 transactions.push({date, payee: e.final, amount: m[1], paymentMethod: method,
                     category: e.cat, business: !!e.biz, description: e.desc});
@@ -156,6 +186,9 @@ const componentSpec = {
             "",                 // Italy Expense
             ""                  // Shed
         ]);
+
+        log('Final transactions array length:', transactions.length);
+        log('Final output rows:', outputRows);
 
         $.export('transactions', outputRows);
         return outputRows;
