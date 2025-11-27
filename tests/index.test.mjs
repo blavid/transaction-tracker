@@ -14,12 +14,12 @@ const cases = [
     {
         name: 'Citi - in-person transaction',
         sms: 'Citi Alert: A $43.38 transaction was made at CAMP ABBOT ACE HARDW on card ending in 0569. View details at citi.com/citimobileapp',
-        expect: {count: 1, payee: 'Camp Abbot Ace Hardware', amount: '43.38', paymentMethod: 'Citibank Card'}
+        expect: {count: 1, payee: 'Ace Hardware', amount: '43.38', paymentMethod: 'Citibank Card'}
     },
     {
         name: 'Citi - card-not-present (online)',
         sms: 'Citi Alert: Card ending in 0569 was not present for a $101.54 transaction at THE HOME DEP. View at citi.com/citimobileapp',
-        expect: {count: 1, payee: 'Home Dep', amount: '101.54', paymentMethod: 'Citibank Card'}
+        expect: {count: 1, payee: 'Home Depot', amount: '101.54', paymentMethod: 'Citibank Card'}
     },
     {
         name: 'First Tech - multi transactions',
