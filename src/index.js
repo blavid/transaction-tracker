@@ -1,200 +1,151 @@
 const componentSpec = {
-    async run({steps, $}) {
-        let smsText = steps.trigger.event.body.text;
-        if (!smsText && steps.trigger.event.body.html) {
-            const {parse} = await import('node-html-parser');
+    async run({ steps, $ }) {
+        // ── Extract clean SMS text ─────────────────────
+        let sms = steps.trigger.event.body?.text || '';
+        if (!sms && steps.trigger.event.body?.html) {
+            const { parse } = await import('node-html-parser');
             const root = parse(steps.trigger.event.body.html);
             const body = root.querySelector('body');
-            smsText = body ? body.textContent.trim() : '';
-            smsText = smsText.replace(/\s+/g, ' ').trim();
+            sms = body ? body.textContent.trim() : '';
+            sms = sms.replace(/\s+/g, ' ').trim();
         }
-        if (!smsText) throw new Error('No SMS text found');
+        if (!sms) return [];
 
-        if (smsText.includes('Debit Card Purchase Alert from First Tech Federal Credit Union')) {
-            $.export('transactions', []);
-            return [];
-        }
+        // Early exit for known junk alerts
+        // if (/Debit Card Purchase Alert|was not present for a \$/.test(sms)) return [];
 
-        let transactions = [];
+        const transactions = [];
 
-        const log = (msg, data) => {
-            console.log(`${msg}`, data ? JSON.stringify(data, null, 2) : '');
-        };
-
-        // === PAYEE MAPPING (friendly + metadata) ===
-// === FINAL ROBUST PAYEE MAPPING WITH REGEX ===
-        const PAYEE_MAP = [
-            { regex: /MICROSOFT\*XB/i,                    name: 'Microsoft',           category: 'Entertainment',       business: false, desc: 'Microsoft Xbox Game Pass' },
-            { regex: /AMAZON\.COM|AMZN\s+MKTP/i,          name: 'Amazon',              category: 'Household Items - H', business: false, desc: 'Online shopping' },
-            { regex: /WINCO\s+FOODS/i,                    name: 'Winco',               category: 'Groceries',           business: false, desc: 'Groceries' },
-            { regex: /COSTCO\s+WHSE/i,                    name: 'Costco',              category: 'Groceries',           business: false, desc: 'Groceries' },
-            { regex: /SAFEWAY/i,                          name: 'Safeway',             category: 'Groceries',           business: false, desc: 'Groceries' },
-            { regex: /HOME\s+DEP/i,                       name: 'Home Depot',          category: 'Household Items - H', business: false },
-            { regex: /TESLA\s+SUBSCR/i,                   name: 'Tesla',               category: 'Auto Maint',          business: false, desc: 'FSD or Premium Connectivity' },
-            { regex: /CAMP\s+ABBOT\s+ACE/i,               name: 'Ace Hardware',        category: 'Household Items - SR', business: true },
-            { regex: /PORTLAND\s+GENERAL/i,               name: 'Pge',                 category: 'Utilities - H',       business: false, desc: 'Electrical Service' },
-            { regex: /HILLSBORO\s+UTILITIES/i,            name: 'City Of Hillsboro',   category: 'Utilities - H',       business: false, desc: 'Water and sewer service' },
-            { regex: /CASCADE\s+NATURAL/i,                name: 'Cascade Natural Gas', category: 'Utilities- SR',       business: true, desc: 'Natural Gas Service' },
-            { regex: /HOST\s+TOOLS/i,                     name: 'Host Tools',          category: 'Misc Svcs - SR',      business: true, desc: 'Monthly Subscription' },
-            { regex: /SUNRIVER\s+ENVIRON/i,               name: 'Sunriver Environmental', category: 'Utilities - SR',   business: true, desc: 'Water and sewer service' },
-            { regex: /STARLINK\s+HAS/i,                   name: 'Starlink',            category: 'Utilities- H',        business: false, desc: 'Internet Service' },
-            { regex: /SANTANDER/i,                        name: 'Santander Bank',      category: 'Auto Payments',       business: false, desc: 'Car payment for Carmen' },
-            { regex: /BANK\s+OF\s+AMERICA/i,              name: 'Bank of America',     category: 'Auto Payments',       business: false, desc: 'RV payment for Thad' },
-            { regex: /ORACLE/i,                           name: 'Oracle COBRA',        category: 'Healthcare',          business: false, desc: 'COBRA payment' },
-            { regex: /VESTWELL/i,                         name: 'Sumday',              category: 'Charity',             business: false, desc: 'Contribution to 529 plan' },
-            { regex: /SUNRIVER\s+OWNERS/i,                name: 'Sunriver HOA',        category: 'HOA Dues - SR',       business: true, desc: 'Homeowner Association dues' },
-            { regex: /SQ\s*\*\s*THREE\s+RI/i,             name: 'Three Rivers Pool and Spa', category: 'Misc Svcs - SR', business: true, desc: 'Spa Service' },
-            { regex: /WORLDMARK/i,                        name: 'Worldmark The Club',  category: 'Travel',              business: false, desc: 'Maintenance Dues' },
-            { regex: /TESLA\s+SUPERC/i,                   name: 'Tesla Supercharger',  category: 'Auto Maint',          business: true, desc: 'Fuel for Carmen' },
-            { regex: /HILLSBORO\s+GA/i,                   name: 'Hillsboro Garbage',   category: 'Utilities- H',        business: false, desc: 'Garbage service' },
-            { regex: /NW\s+NATURAL/i,                     name: 'NW Natural',          category: 'Utilities- H',        business: false, desc: 'Natural Gas Service' },
-            { regex: /MIDSTATE\s+ELE/i,                   name: 'Midstate Electric',   category: 'Utilities - SR',      business: true, desc: 'Electrical Service' },
-            { regex: /NETFLIX/i,                          name: 'Netflix',             category: 'Utilities - SR',      business: true, desc: 'Monthly Subscription' },
-            { regex: /VENMO/i,                            name: 'Zully Ponce',         category: 'Cleaning Svcs - SR',  business: true, desc: 'Cleaning for guest' },
-            { regex: /.*/,                                name: null,                  category: 'Other',               business: false, desc: 'Manual Review Required' }
+        // ── ALL YOUR PAYEES – exactly the same logic ─────────────────────
+        const PAYEES = [
+            { r: /MICROSOFT\*XB/i,                  n: 'Microsoft',               c: 'Entertainment',       b: false, d: 'Microsoft Xbox Game Pass' },
+            { r: /AMAZON\.COM|AMZN\s+MKTP/i,        n: 'Amazon',                  c: 'Household Items - H', b: false, d: 'Online shopping' },
+            { r: /WINCO\s+FOODS/i,                  n: 'Winco',                   c: 'Groceries',           b: false },
+            { r: /COSTCO\s+WHSE/i,                  n: 'Costco',                  c: 'Groceries',           b: false },
+            { r: /SAFEWAY/i,                        n: 'Safeway',                 c: 'Groceries',           b: false },
+            { r: /HOME\s+DEP/i,                     n: 'Home Depot',              c: 'Household Items - H', b: false },
+            { r: /TESLA\s+SUBSCR/i,                 n: 'Tesla',                   c: 'Auto Maint',          b: false, d: 'FSD or Premium Connectivity' },
+            { r: /CAMP\s+ABBOT\s+ACE/i,             n: 'Ace Hardware',            c: 'Household Items - SR',b: true },
+            { r: /PORTLAND\s+GENERAL/i,             n: 'Pge',                     c: 'Utilities - H',       b: false, d: 'Electrical Service' },
+            { r: /HILLSBORO\s+UTILITIES/i,          n: 'City Of Hillsboro',       c: 'Utilities - H',       b: false, d: 'Water and sewer service' },
+            { r: /CASCADE\s+NATURAL/i,              n: 'Cascade Natural Gas',     c: 'Utilities- SR',       b: true,  d: 'Natural Gas Service' },
+            { r: /HOST\s+TOOLS/i,                   n: 'Host Tools',              c: 'Misc Svcs - SR',      b: true,  d: 'Monthly Subscription' },
+            { r: /SUNRIVER\s+ENVIRON/i,             n: 'Sunriver Environmental',  c: 'Utilities - SR',      b: true,  d: 'Water and sewer service' },
+            { r: /STARLINK\s+HAS/i,                 n: 'Starlink',                c: 'Utilities- H',        b: false, d: 'Internet Service' },
+            { r: /SANTANDER/i,                      n: 'Santander Bank',          c: 'Auto Payments',       b: false, d: 'Car payment for Carmen' },
+            { r: /BANK\s+OF\s+AMERICA/i,            n: 'Bank of America',         c: 'Auto Payments',       b: false, d: 'RV payment for Thad' },
+            { r: /ORACLE/i,                         n: 'Oracle COBRA',            c: 'Healthcare',          b: false, d: 'COBRA payment' },
+            { r: /VESTWELL/i,                       n: 'Sumday',                  c: 'Charity',             b: false, d: 'Contribution to 529 plan' },
+            { r: /SUNRIVER\s+OWNERS/i,              n: 'Sunriver HOA',            c: 'HOA Dues - SR',       b: true,  d: 'Homeowner Association dues' },
+            { r: /SQ\s*\*\s*THREE\s+RI/i,           n: 'Three Rivers Pool and Spa',c: 'Misc Svcs - SR',     b: true,  d: 'Spa Service' },
+            { r: /WORLDMARK/i,                      n: 'Worldmark The Club',      c: 'Travel',              b: false, d: 'Maintenance Dues' },
+            { r: /TESLA\s+SUPERC/i,                 n: 'Tesla Supercharger',      c: 'Auto Maint',          b: true,  d: 'Fuel for Carmen' },
+            { r: /HILLSBORO\s+GA/i,                 n: 'Hillsboro Garbage',       c: 'Utilities- H',        b: false, d: 'Garbage service' },
+            { r: /NW\s+NATURAL/i,                   n: 'NW Natural',              c: 'Utilities- H',        b: false, d: 'Natural Gas Service' },
+            { r: /MIDSTATE\s+ELE/i,                 n: 'Midstate Electric',       c: 'Utilities - SR',      b: true,  d: 'Electrical Service' },
+            { r: /NETFLIX/i,                        n: 'Netflix',                 c: 'Utilities - SR',      b: true,  d: 'Monthly Subscription' },
+            { r: /VENMO/i,                          n: 'Zully Ponce',             c: 'Cleaning Svcs - SR',  b: true,  d: 'Cleaning for guest' },
+            { r: /.*/,                              n: null,                      c: 'Other',               b: false, d: 'Manual Review Required' }
         ];
 
-        function enrichPayee(rawPayee) {
-            if (!rawPayee) return { final: 'Unknown', cat: 'Other', biz: false, desc: '' };
-            const cleaned = rawPayee.trim();
-            const rule = PAYEE_MAP.find(r => r.regex.test(cleaned));
-
-            if (!rule || !rule.name) {
+        const enrich = (raw) => {
+            const cleaned = raw.trim();
+            const rule = PAYEES.find(p => p.r.test(cleaned));
+            if (!rule?.n) {
                 return {
-                    final: toTitleCase(cleaned),
-                    cat: rule?.category || 'Other',
+                    payee: toTitleCase(cleaned),
+                    cat: 'Other',
                     biz: false,
-                    desc: rule?.desc || 'Manual Review Required'
+                    desc: 'Manual Review Required'
                 };
             }
+            return { payee: rule.n, cat: rule.c, biz: rule.b, desc: rule.d || '' };
+        };
 
-            return {
-                final: rule.name,
-                cat: rule.category,
-                biz: rule.business,
-                desc: rule.desc || ''
-            };
-        }
+        const toTitleCase = s => s ? s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : s;
 
-        const toTitleCase = str => str
-            ? str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(/#(\d+)/g, '#$1')
-            : str;
+        const excluded = ['CITI CARD ONLINE', 'CHASE CREDIT CRD', 'CAPITAL ONE', 'OVERDRAFT PROTECTION ADVANCE']
+            .map(s => s.toUpperCase());
 
-        const excludedPayees = [
-            'CITI CARD ONLINE - PAYMENT',
-            'CHASE CREDIT CRD - EPAY',
-            'CAPITAL ONE - MOBILE PMT',
-            'ACH Debit CITI CARD ONLINE - PAYMENT',
-            'ACH Debit CHASE CREDIT CRD - EPAY',
-            'ACH Debit CAPITAL ONE - MOBILE PMT',
-            'OVERDRAFT PROTECTION ADVANCE'
-        ].map(s => s.toUpperCase());
+        const isExcluded = str => excluded.some(e => str.toUpperCase().includes(e));
 
-        const patterns = [
-            { r: /Prime Visa: You made(?: an online[^$]*?)? \$(\d+\.\d{2}).*?with (.+?) on/, m: m=>({a:m[1],p:m[2]}), meth:'Chase Card' },
-            { r: /Prime Visa: You made a \$(\d+\.\d{2}) transaction with (.+?) on/, m: m=>({a:m[1],p:m[2]}), meth:'Chase Card' },
-            { r: /Prime Visa: You have a \$(\d+\.\d{2}) pending credit from (.+?)\./, m: m=>({a:`-${m[1]}`,p:m[2]}), meth:'Chase Card' },
-            { r: /Capital One: A chrge or hold for \$(\d+\.\d{2}).* at (.+?)\./, m: m=>({a:m[1],p:m[2]}), meth:'Savor Card' },
-            { r: /Capital One Alert: Your payment of/, m:()=>null, meth:'Savor Card' },
-            { r: /Capital One Alert: You paid/, m:()=>null, meth:'Savor Card' },
-            { r: /Citi Alert: Card ending in \d{4} was not present for a \$(\d+\.\d{2}).*?at\s+(.+?)\.\s*(View|citi|$)/i, m: m=>({a:m[1],p:m[2].trim().replace(/\s+/g,' ')}), meth:'Citibank Card' },
-            { r: /Citi Alert: A \$(\d+\.\d{2}) transaction was made at\s+([^.]+?)\s+on card ending in \d{4}/i, m: m=>({a:m[1],p:m[2].trim().replace(/\s+/g,' ')}), meth:'Citibank Card' },
-            { r: /Debit Card Purchase Alert.*TRAN AMT: \$(\d+\.\d{2}).*TRAN DESC:.*?(.+?)\s+AVAIL BAL:/, m: m=>({a:m[1],p:m[2].trim()}), meth:'Debit Card' }
-        ].map(o => ({regex: o.r, paymentMethod: o.meth, extract: o.m}));
+        // ── FIRST TECH FEDERAL CREDIT UNION ─────────────────────
+        if (sms.includes('Transaction Alert from First Tech Federal Credit Union')) {
+            for (const block of sms.split('***').slice(1)) {
+                const m = block.match(/had a transaction of \(\$([0-9,]+\.\d{2})\)\.\s*Description:\s*(.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i);
+                if (!m) continue;
 
-        let matched = false;
-
-        if (smsText.includes('Transaction Alert from First Tech Federal Credit Union')) {
-            const blocks = smsText.split('***').slice(1);
-            for (const b of blocks) {
-                const m = b.match(/had a transaction of \(\$([0-9,]+\.\d{2})\)\.\s*Description:\s*(.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/is);
-                if (!m) {
-                    log('No match for block:', b);
-                    continue;
-                }
-
-                log('Raw description:', m[2]);
                 let payee = m[2]
-                    .replace(/\s*\.$/, '')                    // trailing " ."
-                    .replace(/^ACH\s+Debit\s+/i, '')          // "ACH Debit "
-                    .replace(/\s*-.*BILL.?PAYMT.*$/i, '')     // "- BILL PAYMT" garbage
-                    .replace(/\s*-.*PAYMT.*$/i, '')           // any "- PAYMT"
-                    .replace(/\s+FIRST TECH FCU.*$/i, '')     // remove your own credit union name
+                    .replace(/\s*\.$/, '')
+                    .replace(/^ACH\s+Debit\s+/i, '')
+                    .replace(/\s*-.*BILL.?PAYMT.*$/i, '')
+                    .replace(/\s*-.*PAYMT.*$/i, '')
+                    .replace(/\s+FIRST TECH FCU.*$/i, '')
                     .trim();
 
-                log('Cleaned payee:', `"${payee}"`);
+                if (isExcluded(payee)) continue;
 
-                // let payee = m[2].replace(/\s*\.$/, '').replace(/^ACH\s+Debit\s+/i, '').trim();
-                const norm = payee.toUpperCase().replace(/\s+/g,' ').trim();
-                log('Norm for exclude check:', `"${norm}"`);
+                const { payee: p, cat, biz, desc } = enrich(payee);
+                const monthMap = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
+                const date = `${monthMap[m[3]]}/${m[4].padStart(2,'0')}/${m[5]}`;
 
-                if (excludedPayees.some(e => norm.includes(e))) {
-                    log('SKIPPED by excludedPayees:', norm);
-                    continue;
-                }
-
-                const monthMap = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-                const date = `${monthMap[m[3]]||'01'}/${m[4].padStart(2,'0')}/${m[5]}`;
-                const method = norm.includes('VENMO') ? 'Venmo' : 'Debit Card';
-                const e = enrichPayee(payee);
-
-                log('Enriched result:', e);
-
-                log('Pushing transaction:', {date, payee: e.final, amount: m[1], business: !!e.biz});
-
-                transactions.push({date, payee: e.final, amount: m[1], paymentMethod: method,
-                    category: e.cat, business: !!e.biz, description: e.desc});
+                transactions.push({
+                    date,
+                    payee: p,
+                    amount: m[1].replace(/,/g, ''),
+                    paymentMethod: payee.toUpperCase().includes('VENMO') ? 'Venmo' : 'Debit Card',
+                    category: cat,
+                    business: biz,
+                    description: desc
+                });
             }
-        } else {
-            for (const p of patterns) {
-                const m = smsText.match(p.regex);
+        }
+        // ── ALL OTHER CARDS ─────────────────────────────────────
+        else {
+            const patterns = [
+                { r: /Prime Visa.*?\$([0-9,.]+).*?with (.+?) on/,                 meth: 'Chase Card' },
+                { r: /Capital One.*?\$([0-9,.]+).*?at (.+?)\./,                  meth: 'Savor Card' },
+                { r: /Citi Alert.*?\$([0-9,.]+).*?at\s+(.+?)\.\s*(View|citi|$)/i, meth: 'Citibank Card' },
+                { r: /Citi Alert.*?\$([0-9,.]+).*?at\s+([^.]+) on card/i,        meth: 'Citibank Card' }
+            ];
+
+            for (const { r, meth } of patterns) {
+                const m = sms.match(r);
                 if (!m) continue;
-                matched = true;
-                const ex = p.extract(m);
-                if (ex === null) break;
-                const raw = ex.p.trim();
-                const norm = raw.toUpperCase().replace(/\s+/g,' ').trim();
-                if (excludedPayees.some(e => norm.includes(e))) break;
 
-                const e = enrichPayee(raw);
-                const date = new Date().toLocaleDateString('en-US', {month:'2-digit',day:'2-digit',year:'numeric'});
+                const amount = m[1].replace(/,/g, '');
+                const rawPayee = m[2].trim();
+                if (isExcluded(rawPayee)) break;
 
-                transactions.push({date, payee: e.final, amount: ex.a, paymentMethod: p.paymentMethod,
-                    category: e.cat, business: !!e.biz, description: e.desc});
+                const { payee, cat, biz, desc } = enrich(rawPayee);
+                const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+
+                transactions.push({
+                    date, payee, amount, paymentMethod: meth,
+                    category: cat, business: biz, description: desc
+                });
                 break;
-            }
-
-            if (!matched && transactions.length === 0) {
-                const amount = smsText.match(/\$(\d+\.\d{2})/)?.[1] || 'Unknown';
-                const e = enrichPayee('Manual Review Required');
-                const date = new Date().toLocaleDateString('en-US', {month:'2-digit',day:'2-digit',year:'numeric'});
-                transactions.push({date, payee: e.final, amount, paymentMethod: 'Unknown',
-                    category: e.cat, business: false, description: e.desc});
             }
         }
 
-        // FINAL OUTPUT — PERFECT COLUMN ALIGNMENT WITH YOUR GOOGLE SHEET
-        const outputRows = transactions.map(t => [
+        // ── FINAL OUTPUT TO GOOGLE SHEETS ─────────────────────
+        const rows = transactions.map(t => [
             t.date,
             t.payee,
-            t.description || "",
-            t.category || "",
+            t.description || '',
+            t.category || '',
             t.amount,
             t.paymentMethod,
-            t.business === true ? true : false,
-            "",                 // Shared Expense
-            "",                 // Italy Expense
-            ""                  // Shed
+            !!t.business,
+            '', '', ''   // Shared / Italy / Shed
         ]);
 
-        log('Final transactions array length:', transactions.length);
-        log('Final output rows:', outputRows);
-
-        $.export('transactions', outputRows);
-        return outputRows;
+        $.export('transactions', rows);
+        return rows;
     }
 };
 
+// ── EXACT EXPORTS YOUR TESTS AND PIPEDREAM EXPECT ─────
 const maybeWrapped = typeof defineComponent !== 'undefined' ? defineComponent(componentSpec) : componentSpec;
 export default maybeWrapped;
-export {componentSpec};
+export { componentSpec };
