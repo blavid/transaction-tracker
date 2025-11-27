@@ -4,29 +4,29 @@ const cases = [
     {
         name: 'Chase - Costco purchase',
         sms: 'Prime Visa: You made a $75.96 transaction with COSTCO WHSE #1696 on Nov 12, 2025 at 7:40 PM ET.',
-        expect: {count: 1, payee: 'Costco Whse #1696', amount: '75.96', paymentMethod: 'Chase Card'}
+        expect: {count: 1, payee: 'Costco', amount: '75.96', paymentMethod: 'Chase Card'}
     },
     {
         name: 'Chase - online/phone/mail variant',
         sms: 'Prime Visa: You made an online, phone, or mail transaction of $75.99 with Amazon.com on Nov 12, 2025 at 7:53 PM ET.',
-        expect: {count: 1, payee: 'Amazon.Com', amount: '75.99', paymentMethod: 'Chase Card'}
+        expect: {count: 1, payee: 'Amazon', amount: '75.99', paymentMethod: 'Chase Card'}
     },
     {
         name: 'Citi - in-person transaction',
         sms: 'Citi Alert: A $43.38 transaction was made at CAMP ABBOT ACE HARDW on card ending in 0569. View details at citi.com/citimobileapp',
-        expect: {count: 1, payee: 'Camp Abbot Ace Hardw', amount: '43.38', paymentMethod: 'Citibank Card'}
+        expect: {count: 1, payee: 'Ace Hardware', amount: '43.38', paymentMethod: 'Citibank Card'}
     },
     {
         name: 'Citi - card-not-present (online)',
         sms: 'Citi Alert: Card ending in 0569 was not present for a $101.54 transaction at THE HOME DEP. View at citi.com/citimobileapp',
-        expect: {count: 1, payee: 'The Home Dep', amount: '101.54', paymentMethod: 'Citibank Card'}
+        expect: {count: 1, payee: 'Home Depot', amount: '101.54', paymentMethod: 'Citibank Card'}
     },
     {
         name: 'First Tech - multi transactions',
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n***5267 had a transaction of ($131.15). Description: ACH Debit PORTLAND GENERAL BILLPAY - BILLPAY . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ***5267 had a transaction of ($50.00). Description: ACH Debit VESTWELL  - ACH TRAN . Date: Nov 04, 2025 ',
         expect: {
             count: 3,
-            payees: ['Portland General Billpay - Billpay', 'Vestwell  - Ach Tran', 'Vestwell  - Ach Tran']
+            payees: ['Pge', 'Vestwell  - Ach Tran', 'Vestwell  - Ach Tran']
         }
     },
     {
@@ -69,7 +69,7 @@ const cases = [
         name: 'First Tech - Mixed credit card payment and legit transaction',
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n' +
             '***5267 had a transaction of ($116.45). Description: ACH Debit  OF HILLSBORO UTILITIES - UTILITIES . Date: Nov 12, 2025 ***5267 had a transaction of ($96.43). Description: ACH Debit CHASE CREDIT CRD  - EPAY . Date: Nov 12, 2025',
-        expect: {count: 1, payee: 'Of Hillsboro Utilities - Utilities', amount: '116.45', paymentMethod: 'Debit Card'}
+        expect: {count: 1, payee: 'City Of Hillsboro', amount: '116.45', paymentMethod: 'Debit Card'}
     },
     {
         name: 'First Tech - Debit Card Purchase Alert (duplicate - ignore)',
