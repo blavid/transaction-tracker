@@ -29,7 +29,7 @@ const componentSpec = {
             { r:/HOST\s+TOOLS/i,                   n:'Host Tools',              c:'Misc Svcs - SR',      b:true,  s:false },
             { r:/SUNRIVER\s+ENVIRON/i,             n:'Sunriver Environmental',  c:'Utilities - SR',      b:true,  s:false },
             { r:/STARLINK\s+HAS/i,                 n:'Starlink',                c:'Utilities- H',        b:false, s:true },
-            { r:/SANTANDER/i,                      n:'Santander Bank',          c:'Auto Payments',       b:false, s:false, d:'Car payment for Carmen' },
+            { r:/SANTANDER/i,                      n:'Santander Bank',          c:'Auto Payments',       b:false, s:true, d:'Car payment for Carmen' },
             { r:/BANK\s+OF\s+AMERICA/i,            n:'Bank of America',         c:'Auto Payments',       b:false, s:true, d:'RV payment for Thad' },
             { r:/ORACLE/i,                         n:'Oracle COBRA',            c:'Healthcare',          b:false, s:true },
             { r:/VESTWELL/i,                       n:'Sumday',                  c:'Charity',             b:false, s:false },
