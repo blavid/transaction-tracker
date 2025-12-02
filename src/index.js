@@ -103,6 +103,10 @@ const componentSpec = {
 
         // ── ALL OTHER CARDS ─────────────────────────────────────
         else {
+            // EARLY EXIT: Ignore the redundant "online, phone, or mail" Chase message
+            if (sms.includes('Prime Visa: You made an online, phone, or mail transaction of')) {
+                return []; // silently drop this variant — we only want the clean one
+            }
             const patterns = [
                 { r:/Prime Visa.*?\$([0-9,.]+).*?with (.+?) on/,                 meth:'Chase Card' },
                 { r:/Capital One.*?\$([0-9,.]+).*?at (.+?)\./,                  meth:'Savor Card' },
@@ -121,8 +125,17 @@ const componentSpec = {
                 const { payee, cat, biz, shared, desc } = enrich(rawPayee);
                 const date = new Date().toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
 
-                transactions.push({ date, payee, amount, paymentMethod: meth,
-                    category: cat, business: biz, shared, description: desc });
+                // ── DEDUPLICATION: Chase sends two identical alerts for online purchases ──
+                const dedupKey = `${amount}|${payee}|${date}|${meth}`;
+                if (transactions.some(t => t.dedupKey === dedupKey)) {
+                    break; // duplicate → skip silently
+                }
+
+                transactions.push({
+                    date, payee, amount, paymentMethod: meth,
+                    category: cat, business: biz, shared, description: desc,
+                    dedupKey  // temporary field — automatically stripped in output
+                });
                 break;
             }
         }

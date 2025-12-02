@@ -9,7 +9,7 @@ const cases = [
     {
         name: 'Chase - online/phone/mail variant',
         sms: 'Prime Visa: You made an online, phone, or mail transaction of $75.99 with Amazon.com on Nov 12, 2025 at 7:53 PM ET.',
-        expect: { count: 1, payee: 'Amazon', amount: '75.99', paymentMethod: 'Chase Card', shared: false }
+        expect: { count: 0}
     },
     {
         name: 'Citi - in-person transaction',
