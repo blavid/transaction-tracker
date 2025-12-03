@@ -16,7 +16,7 @@ const componentSpec = {
         // ── PAYEES — now with optional "shared" boolean ─────────────────────
         const PAYEES = [
             { r:/MICROSOFT\*XB/i,                  n:'Microsoft',               c:'Entertainment',       b:false, s:false, d:'Microsoft Xbox Game Pass' },
-            { r:/AMAZON\.COM|AMZN\s+MKTP/i,        n:'Amazon',                  c:'Household Items - H', b:false, s:false,  d:'Online shopping' },
+            { r:/AMAZON\.COM|AMZN\s+MKTP|AMAZON MKTPLACE/i, n:'Amazon',         c:'Household Items - H', b:false, s:false,  d:'Online shopping' },
             { r:/WINCO\s+FOODS/i,                  n:'Winco',                   c:'Groceries',           b:false, s:false, d:'Groceries' },
             { r:/COSTCO\s+WHSE/i,                  n:'Costco',                  c:'Groceries',           b:false, s:false, d:'Groceries and stuff' },
             { r:/SAFEWAY/i,                        n:'Safeway',                 c:'Groceries',           b:false, s:false, d:'Groceries' },
