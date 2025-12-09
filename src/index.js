@@ -110,8 +110,8 @@ const componentSpec = {
             const patterns = [
                 { r:/Prime Visa.*?\$([0-9,.]+).*?with (.+?) on/,                 meth:'Chase Card' },
                 { r:/Capital One.*?\$([0-9,.]+).*?at (.+?)\./,                  meth:'Savor Card' },
-                { r:/Citi Alert.*?\$([0-9,.]+).*?at\s+(.+?)\.\s*(View|citi|$)/i,meth:'Citibank Card' },
-                { r:/Citi Alert.*?\$([0-9,.]+).*?at\s+([^.]+) on card/i,        meth:'Citibank Card' }
+                { r:/Citi Alert.*?\$([0-9,.]+).*?at\s+(.+?)\s+on card\s+(?:ending in|last 4 digits)?\s*\d{4}/i, meth:'Citibank Card' },
+                { r:/Citi Alert.*?\$([0-9,.]+).*?at\s+(.+?)\.\s*(?:View|citi|$)/i, meth:'Citibank Card' }
             ];
 
             for (const { r, meth } of patterns) {
