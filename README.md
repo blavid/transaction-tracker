@@ -15,3 +15,5 @@ When code is checked in to Github, tests are run automatically as configured in 
 To deploy this code, log on to [Pipedream.com](pipedream.com). In the **Finance Tracking** project, there is a `Citibank` job. 
 Select the `parse_sms` step and edit it. Copy the index.js file from this project and paste it there. Test the job, then
 test the workflow. If all goes well, hit the `deploy` button.
+
+Good luck!
