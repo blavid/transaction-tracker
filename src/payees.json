@@ -1,0 +1,234 @@
+[
+  {
+    "regex": "MICROSOFT\\*XB",
+    "name": "Microsoft",
+    "category": "Entertainment",
+    "business": false,
+    "shared": false,
+    "desc": "Microsoft Xbox Game Pass"
+  },
+  {
+    "regex": "AMAZON\\.COM|AMZN\\s+MKTP|AMAZON MKTPLACE",
+    "name": "Amazon",
+    "category": "Household Items - H",
+    "business": false,
+    "shared": false,
+    "desc": "Online shopping"
+  },
+  {
+    "regex": "WINCO",
+    "name": "Winco",
+    "category": "Groceries",
+    "business": false,
+    "shared": false,
+    "desc": "Groceries"
+  },
+  {
+    "regex": "COSTCO\\s+WHSE",
+    "name": "Costco",
+    "category": "Groceries",
+    "business": false,
+    "shared": false,
+    "desc": "Groceries and stuff"
+  },
+  {
+    "regex": "SAFEWAY",
+    "name": "Safeway",
+    "category": "Groceries",
+    "business": false,
+    "shared": false,
+    "desc": "Groceries"
+  },
+  {
+    "regex": "HOME\\s+DEP",
+    "name": "Home Depot",
+    "category": "Household Items - H",
+    "business": false,
+    "shared": false,
+    "desc": "Home maintenance stuff"
+  },
+  {
+    "regex": "TESLA\\s+SUBSCR",
+    "name": "Tesla",
+    "category": "Auto Maint",
+    "business": false,
+    "shared": false,
+    "desc": "FSD or Premium Connectivity"
+  },
+  {
+    "regex": "CAMP\\s+ABBOT\\s+ACE",
+    "name": "Ace Hardware",
+    "category": "Household Items - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Home maintenance stuff"
+  },
+  {
+    "regex": "PORTLAND\\s+GENERAL",
+    "name": "Pge",
+    "category": "Utilities - H",
+    "business": false,
+    "shared": true,
+    "desc": "Electrical Service"
+  },
+  {
+    "regex": "HILLSBORO UTILITIES",
+    "name": "City Of Hillsboro",
+    "category": "Utilities - H",
+    "business": false,
+    "shared": true,
+    "desc": "Water and sewer service"
+  },
+  {
+    "regex": "CASCADE\\s+NATURAL",
+    "name": "Cascade Natural Gas",
+    "category": "Utilities- SR",
+    "business": true,
+    "shared": false,
+    "desc": "Natural gas service"
+  },
+  {
+    "regex": "HOST\\s+TOOLS",
+    "name": "Host Tools",
+    "category": "Misc Svcs - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Monthly subscription"
+  },
+  {
+    "regex": "SUNRIVER\\s+ENVIRON",
+    "name": "Sunriver Environmental",
+    "category": "Utilities - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Water and sewer service"
+  },
+  {
+    "regex": "STARLINK",
+    "name": "Starlink",
+    "category": "Utilities- H",
+    "business": false,
+    "shared": true,
+    "desc": "Monthly Starlink subscription"
+  },
+  {
+    "regex": "SANTANDER",
+    "name": "Santander Bank",
+    "category": "Auto Payments",
+    "business": false,
+    "shared": true,
+    "desc": "Car payment for Carmen"
+  },
+  {
+    "regex": "BANK\\s+OF\\s+AMERICA",
+    "name": "Bank of America",
+    "category": "Auto Payments",
+    "business": false,
+    "shared": true,
+    "desc": "RV payment for Thad"
+  },
+  {
+    "regex": "ORACLE",
+    "name": "Oracle COBRA",
+    "category": "Healthcare",
+    "business": false,
+    "shared": true,
+    "desc": "Monthly COBRA insurance premium"
+  },
+  {
+    "regex": "VESTWELL",
+    "name": "Sumday",
+    "category": "Charity",
+    "business": false,
+    "shared": false,
+    "desc": "Monthly contribution"
+  },
+  {
+    "regex": "SUNRIVER\\s+OWNERS",
+    "name": "Sunriver HOA",
+    "category": "HOA Dues - SR",
+    "business": true,
+    "shared": false,
+    "desc": "HOA dues"
+  },
+  {
+    "regex": "SQ\\s*\\*\\s*THREE\\s+RI",
+    "name": "Three Rivers Pool and Spa",
+    "category": "Misc Svcs - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Spa maintenance"
+  },
+  {
+    "regex": "WORLDMARK",
+    "name": "Worldmark The Club",
+    "category": "Travel",
+    "business": false,
+    "shared": true,
+    "desc": "Monthly maintenance dues"
+  },
+  {
+    "regex": "TESLA\\s+SUPERC",
+    "name": "Tesla Supercharger",
+    "category": "Auto Maint",
+    "business": false,
+    "shared": false,
+    "desc": "Electricity for Carmen"
+  },
+  {
+    "regex": "HILLSBORO\\s+GA",
+    "name": "Hillsboro Garbage",
+    "category": "Utilities- H",
+    "business": false,
+    "shared": true,
+    "desc": "Garbage service"
+  },
+  {
+    "regex": "NW\\s+NATURAL",
+    "name": "NW Natural",
+    "category": "Utilities- H",
+    "business": false,
+    "shared": true,
+    "desc": "Natural gas service"
+  },
+  {
+    "regex": "MIDSTATE\\s+ELE",
+    "name": "Midstate Electric",
+    "category": "Utilities - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Electrical Service"
+  },
+  {
+    "regex": "NETFLIX",
+    "name": "Netflix",
+    "category": "Utilities - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Monthly Netflix subscription"
+  },
+  {
+    "regex": "ZIPLY",
+    "name": "Ziply Fiber",
+    "category": "Utilities - H",
+    "business": true,
+    "shared": true,
+    "desc": "Internet service"
+  },
+  {
+    "regex": "VENMO",
+    "name": "Zully Ponce",
+    "category": "Cleaning Svcs - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Cleaning for GUEST"
+  },
+  {
+    "regex": ".*",
+    "name": null,
+    "category": "Other",
+    "business": false,
+    "shared": false,
+    "desc": "Manual Review Required"
+  }
+]
