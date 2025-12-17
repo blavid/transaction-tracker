@@ -18,12 +18,12 @@ const componentSpec = {
          const PAYEE_RULES = await response.json();
          // Convert string regexes → real RegExp objects
          const PAYEES = PAYEE_RULES.map(p => ({
-           r: new RegExp(p.regex, 'i'),
-           n: p.name,
-           c: p.category,
-           b: p.business,
-           s: p.shared,
-           d: p.desc || ''
+            r: new RegExp(p.regex, 'i'),
+            n: p.name,
+            c: p.category,
+            b: p.business,
+            s: p.shared,
+            d: p.desc || ''
          }));
 
         const enrich = (raw) => {
