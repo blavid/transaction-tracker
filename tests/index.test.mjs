@@ -42,6 +42,12 @@ const cases = [
         expect: { count: 1, payee: 'City Of Hillsboro', amount: '116.45', paymentMethod: 'Debit Card', shared: true }
     },
     {
+        name: 'First Tech - City of Hillsboro Utilities',
+        sms: 'Transaction Alert from First Tech Federal Credit Union.\n' +
+            '***5267 had a transaction of ($105.01). Description: ACH Debit CITY OF HILLSBOR UTILITIES - UTILITIES . Date: Dec 12, 2025',
+        expect: { count: 1, payee: 'City Of Hillsboro', amount: '105.01', paymentMethod: 'Debit Card', shared: true }
+    },
+    {
         name: 'First Tech - Tesla Supercharger (not shared)',
         sms: 'Transaction Alert from First Tech Federal Credit Union.\n***5267 had a transaction of ($48.50). Description: TESLA SUPERCHARGER WALMART . Date: Nov 21, 2025',
         expect: { count: 1, payee: 'Tesla Supercharger', amount: '48.50', paymentMethod: 'Debit Card', business: false, shared: false }
