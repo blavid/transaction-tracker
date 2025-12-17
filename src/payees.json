@@ -72,7 +72,7 @@
     "desc": "Electrical Service"
   },
   {
-    "regex": "CITY OF HILLS",
+    "regex": "HILLSBORO UTILITIES",
     "name": "City Of Hillsboro",
     "category": "Utilities - H",
     "business": false,

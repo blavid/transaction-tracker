@@ -14,7 +14,7 @@ const componentSpec = {
         const transactions = [];
 
          // Fetch payee map from GitHub (cached automatically by Pipedream)
-         const response = await fetch('https://raw.githubusercontent.com/blavid/transaction-tracker/separate-payee-rules/src/payees.json');
+         const response = await fetch('https://raw.githubusercontent.com/blavid/transaction-tracker/refs/heads/separate-payee-rules/src/payees.json');
          const PAYEE_RULES = await response.json();
          // Convert string regexes → real RegExp objects
          const PAYEES = PAYEE_RULES.map(p => ({
