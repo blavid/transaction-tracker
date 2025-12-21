@@ -82,7 +82,7 @@
   {
     "regex": "CASCADE\\s+NATURAL",
     "name": "Cascade Natural Gas",
-    "category": "Utilities- SR",
+    "category": "Utilities - SR",
     "business": true,
     "shared": false,
     "desc": "Natural gas service"
@@ -170,7 +170,7 @@
   {
     "regex": "TESLA\\s+SUPERC",
     "name": "Tesla Supercharger",
-    "category": "Auto Maint",
+    "category": "Fuel",
     "business": false,
     "shared": false,
     "desc": "Electricity for Carmen"
