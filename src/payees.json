@@ -178,7 +178,7 @@
   {
     "regex": "HILLSBORO\\s+GA",
     "name": "Hillsboro Garbage",
-    "category": "Utilities- H",
+    "category": "Utilities - H",
     "business": false,
     "shared": true,
     "desc": "Garbage service"
@@ -186,7 +186,7 @@
   {
     "regex": "NW\\s+NATURAL",
     "name": "NW Natural",
-    "category": "Utilities- H",
+    "category": "Utilities - H",
     "business": false,
     "shared": true,
     "desc": "Natural gas service"
