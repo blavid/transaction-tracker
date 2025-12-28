@@ -2,11 +2,9 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const filePath = join(__dirname, 'payees.json'); // payees.json in same folder as index.js
+const filePath = join(__dirname, 'payees.json');
 
 const componentSpec = {
     async run({ steps, $ }) {
@@ -18,18 +16,17 @@ const componentSpec = {
             sms = body ? body.textContent.trim() : '';
             sms = sms.replace(/\s+/g, ' ').trim();
         }
-        if (!sms) return [];
+        if (!sms) return { my_transactions: [], wife_transactions: [] };
 
-        const transactions = [];
+        const myTransactions = [];
+        const wifeTransactions = [];
 
-        // ── Load payees.json: local if exists, GitHub if not ─────────────────────
+        // ── Load payees.json ─────────────────────
         let PAYEE_DATA;
         try {
-            // Try local file first (local tests + GitHub Actions)
             const localData = await readFile(filePath, 'utf8');
             PAYEE_DATA = JSON.parse(localData);
         } catch (err) {
-            // File not found or invalid → fetch from GitHub (Pipedream)
             const response = await fetch('https://raw.githubusercontent.com/blavid/transaction-tracker/main/src/payees.json');
             if (!response.ok) throw new Error(`Failed to fetch payees.json: ${response.status}`);
             PAYEE_DATA = await response.json();
@@ -72,8 +69,16 @@ const componentSpec = {
 
         const isExcluded = str => excluded.some(e => str.toUpperCase().includes(e));
 
+        // ── ACCOUNT DETECTION ─────────────────────
+        const isMyFirstTech = /\*\*\*5267/.test(sms);
+        const isWifeFirstTech = /\*\*\*9086/.test(sms);
+        const isMyCiti = /ending in 0569/.test(sms);
+        const isWifeCiti = /ending in 1047/.test(sms);
+
         // ── FIRST TECH ─────────────────────────────────────
         if (sms.includes('Transaction Alert from First Tech Federal Credit Union')) {
+            const target = isMyFirstTech ? myTransactions : isWifeFirstTech ? wifeTransactions : myTransactions;
+
             for (const block of sms.split('***').slice(1)) {
                 const m = block.match(/had a transaction of \(\$([0-9,]+\.\d{2})\)\.\s*Description:\s*(.*?)\s+Date:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i);
                 if (!m) continue;
@@ -92,7 +97,7 @@ const componentSpec = {
                 const monthMap = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
                 const date = `${monthMap[m[3]]}/${m[4].padStart(2,'0')}/${m[5]}`;
 
-                transactions.push({
+                target.push({
                     date, payee: p, amount: m[1].replace(/,/g,''),
                     paymentMethod: payee.toUpperCase().includes('VENMO') ? 'Venmo' : 'Debit Card',
                     category: cat, business: biz, shared, description: desc
@@ -102,10 +107,6 @@ const componentSpec = {
 
         // ── ALL OTHER CARDS ─────────────────────────────────────
         else {
-            // EARLY EXIT: Ignore the redundant "online, phone, or mail" Chase message
-            if (sms.includes('Prime Visa: You made an online, phone, or mail transaction of')) {
-                return []; // silently drop this variant — we only want the clean one
-            }
             const patterns = [
                 { r:/Prime Visa.*?\$([0-9,.]+).*?with (.+?) on/,                 meth:'Chase Card' },
                 { r:/Capital One.*?\$([0-9,.]+).*?at (.+?)\./,                  meth:'Savor Card' },
@@ -124,41 +125,41 @@ const componentSpec = {
                 const { payee, cat, biz, shared, desc } = enrich(rawPayee);
                 const date = new Date().toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
 
-                // ── DEDUPLICATION: Chase sends two identical alerts for online purchases ──
-                const dedupKey = `${amount}|${payee}|${date}|${meth}`;
-                if (transactions.some(t => t.dedupKey === dedupKey)) {
-                    break; // duplicate → skip silently
-                }
+                const target = (meth === 'Citibank Card' && isWifeCiti) ? wifeTransactions :
+                               (meth === 'Citibank Card' && isMyCiti) ? myTransactions : myTransactions;
 
-                transactions.push({
+                target.push({
                     date, payee, amount, paymentMethod: meth,
-                    category: cat, business: biz, shared, description: desc,
-                    dedupKey  // temporary field — automatically stripped in output
+                    category: cat, business: biz, shared, description: desc
                 });
                 break;
             }
         }
 
-        // ── OUTPUT — now with Shared Expense column ─────────────────────
-        const rows = transactions.map(t => [
+        // ── FORMAT ROWS ─────────────────────
+        const formatRows = (txns) => txns.map(t => [
             t.date,
             t.payee,
             t.description || '',
             t.category || '',
             t.amount,
             t.paymentMethod,
-            !!t.business,     // Business Expense → TRUE/FALSE
-            !!t.shared,       // Shared Expense  → TRUE/FALSE
-            '',               // Italy Expense
-            ''                // Shed
+            !!t.business,
+            !!t.shared,
+            '',
+            ''
         ]);
 
-        $.export('transactions', rows);
-        return rows;
+        const myRows = formatRows(myTransactions);
+        const wifeRows = formatRows(wifeTransactions);
+
+        $.export('my_transactions', myRows);
+        $.export('wife_transactions', wifeRows);
+
+        return { my_transactions: myRows, wife_transactions: wifeRows };
     }
 };
 
-// ── EXACT EXPORTS YOUR TESTS EXPECT ─────
 const maybeWrapped = typeof defineComponent !== 'undefined' ? defineComponent(componentSpec) : componentSpec;
 export default maybeWrapped;
 export { componentSpec };
