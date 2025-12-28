@@ -122,7 +122,7 @@
   {
     "regex": "BANK\\s+OF\\s+AMERICA",
     "name": "Bank of America",
-    "category": "Auto Payments",
+    "category": "RV Payments",
     "business": false,
     "shared": true,
     "desc": "RV payment for Thad"
