@@ -224,6 +224,46 @@
     "desc": "Cleaning for GUEST"
   },
   {
+    "regex": "MCDONALD'S",
+    "name": "McDonald's",
+    "category": "Dining",
+    "business": false,
+    "shared": false,
+    "desc": "Food"
+  },
+  {
+    "regex": "UBER",
+    "name": "Uber",
+    "category": "Travel",
+    "business": false,
+    "shared": false,
+    "desc": "Transportation"
+  },
+  {
+    "regex": "LYFT",
+    "name": "Lyft",
+    "category": "Travel",
+    "business": false,
+    "shared": false,
+    "desc": "Transportation"
+  },
+  {
+    "regex": "BARRE",
+    "name": "Barre3",
+    "category": "Misc Svcs - H",
+    "business": false,
+    "shared": false,
+    "desc": "Monthly dues"
+  },
+  {
+    "regex": "DEPT\\s+EDUCATION",
+    "name": "Department of Education",
+    "category": "Student Loans",
+    "business": false,
+    "shared": false,
+    "desc": "Student loan payment"
+  },
+  {
     "regex": ".*",
     "name": null,
     "category": "Other",
