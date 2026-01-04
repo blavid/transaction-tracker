@@ -106,7 +106,7 @@
   {
     "regex": "STARLINK",
     "name": "Starlink",
-    "category": "Utilities- H",
+    "category": "Utilities - H",
     "business": false,
     "shared": true,
     "desc": "Monthly Starlink subscription"
@@ -114,7 +114,7 @@
   {
     "regex": "SANTANDER",
     "name": "Santander Bank",
-    "category": "Auto Payments",
+    "category": "RV Payments",
     "business": false,
     "shared": true,
     "desc": "Car payment for Carmen"
@@ -250,7 +250,7 @@
   {
     "regex": "BARRE",
     "name": "Barre3",
-    "category": "Misc Svcs - H",
+    "category": "Personal Care",
     "business": false,
     "shared": false,
     "desc": "Monthly dues"
