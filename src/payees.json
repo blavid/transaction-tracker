@@ -80,6 +80,14 @@
     "desc": "Water and sewer service"
   },
   {
+    "regex": "CASCADED",
+    "name": "Cascade Disposal",
+    "category": "Utilities - SR",
+    "business": true,
+    "shared": false,
+    "desc": "Garbage service"
+  },
+  {
     "regex": "CASCADE\\s+NATURAL",
     "name": "Cascade Natural Gas",
     "category": "Utilities - SR",
@@ -246,6 +254,14 @@
     "business": false,
     "shared": false,
     "desc": "Transportation"
+  },
+  {
+    "regex": "ABBEY`",
+    "name": "Abbey Road Farm",
+    "category": "Alcohol",
+    "business": false,
+    "shared": false,
+    "desc": "Wine or gifts"
   },
   {
     "regex": "BARRE",
